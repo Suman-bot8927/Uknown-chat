@@ -4,7 +4,7 @@ import Chat from './pages/Chat';
 import UserProfile from './pages/UserProfile';
 import UserGuidelines from './components/UserGuidelines';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007';
+const API_URL = 'https://uknown-chat.onrender.com/';
 
 function App() {
   const [socket, setSocket] = useState(null);
