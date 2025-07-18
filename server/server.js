@@ -7,37 +7,32 @@ const cors = require('cors');
 const sanitizeHtml = require('sanitize-html');
 const Message = require('./models/Message');
 
-if (!process.env.MONGO_URI || !process.env.PORT) {
-  console.error('Error: MONGO_URI and PORT must be defined in .env');
+if (!process.env.MONGO_URI || !process.env.PORT || !process.env.CLIENT_URL) {
+  console.error('Error: MONGO_URI, PORT, and CLIENT_URL must be defined in .env');
   process.exit(1);
 }
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || '*' },
+  cors: { origin: process.env.CLIENT_URL },
   pingTimeout: 60000,
   pingInterval: 25000,
 });
 
 // Middleware
-app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
+app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
 
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
   })
-  .then(() => console.log('Connected to MongoDB'))
   .catch((err) => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
-
-// Message Schema Index for Efficient Sorting
-Message.collection.createIndex({ timestamp: -1 });
 
 // Rate Limiting for Socket Events (per IP)
 const messageRateLimit = new Map();
